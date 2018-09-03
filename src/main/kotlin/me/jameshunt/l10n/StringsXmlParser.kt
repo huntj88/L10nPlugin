@@ -34,6 +34,9 @@ class StringsXmlParser(private val projectName: String) {
         val variables = mutableMapOf<String, String>()
 
         stringFile.file.forEachLine {
+            if(it.isBlank())
+                return@forEachLine
+
             if (it.contains("<?xml version"))
                 return@forEachLine
 

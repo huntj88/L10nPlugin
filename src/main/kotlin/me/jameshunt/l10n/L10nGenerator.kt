@@ -46,7 +46,10 @@ class L10nGenerator(
                 out.writeLn("package $packageName")
                 out.newLine()
 
-                out.writeLn("class $fileName: Language {")
+                when(it.language == "default") {
+                    true ->  out.writeLn("class $fileName: Language {")
+                    false ->  out.writeLn("class $fileName: Language by Default() {")
+                }
 
                 it.variables.forEach {
                     out.writeLn("    override val ${it.key} = \"${it.value}\"")
