@@ -31,10 +31,7 @@ class L10nPlugin : Plugin<Project> {
     }
 
     private fun setupGeneratedSourceDirectory(generatedSrcPath: String) {
-
         val generatedSourceFolder = File(generatedSrcPath)
-
-        println(generatedSourceFolder.absolutePath)
 
         if (generatedSourceFolder.exists()) return
         generatedSourceFolder.mkdirs()

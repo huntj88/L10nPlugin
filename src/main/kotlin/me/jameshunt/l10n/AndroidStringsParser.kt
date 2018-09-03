@@ -11,7 +11,7 @@ class AndroidStringsParser(private val projectName: String) {
         return getFiles().map { parseXml(it) }
     }
 
-    private fun getFiles(): List<StringFileV2> {
+    private fun getFiles(): List<StringFile> {
         val resPath = "./$projectName/src/main/res"
 
         return File(resPath)
@@ -24,19 +24,31 @@ class AndroidStringsParser(private val projectName: String) {
 
                     val language = it.name.substringAfter("-", "default")
 
-                    StringFileV2(
+                    StringFile(
                             language,
                             File("${it.canonicalPath}/strings.xml")
                     )
                 }
     }
 
-    private fun parseXml(stringFileV2: StringFileV2): LanguageSet {
+    private fun parseXml(stringFile: StringFile): LanguageSet {
         val serializer = Persister()
-        val xmlResult = serializer.read(Resources::class.java, stringFileV2.file)
-        val map = xmlResult.list.map { Pair(it.name, it.value) }.toMap()
+        val xmlResult = serializer.read(Resources::class.java, stringFile.file)
+        val map = xmlResult.list.map { Pair(it.name, it.value.escapeCharacters()) }.toMap()
 
-        return LanguageSet(stringFileV2.language, map)
+        return LanguageSet(stringFile.language, map)
+    }
+
+    private fun String.escapeCharacters(): String {
+        return this.escapeBackslash().escapeDoubleQuotes()
+    }
+
+    private fun String.escapeBackslash(): String {
+        return this.replace("\\","\\\\")
+    }
+
+    private fun String.escapeDoubleQuotes(): String {
+        return this.replace("\"","\\\"")
     }
 }
 
@@ -58,7 +70,7 @@ private data class AndroidString @JvmOverloads constructor(
         var value: String = ""
 )
 
-private data class StringFileV2(
+private data class StringFile(
         val language: String,
         val file: File
 )
