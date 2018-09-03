@@ -10,7 +10,7 @@ class L10nPlugin : Plugin<Project> {
     /** TODO
      *  hash of each string file. feed the ones that changed to the generator
      *
-     *  lol, what if i made a generated git repo inside the build/generated/source/L10n/src folder?
+     *  lol, what if i made a generated git repo (local only) inside the build/generated/source/L10n/src folder?
      *
      *  then i could use it to track changes to the strings.xml files(using symlink or something), and only generate a little bit of code.
      *  could maybe get incremental changes to the language file
@@ -24,7 +24,7 @@ class L10nPlugin : Plugin<Project> {
         val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
         setupGeneratedSourceDirectory(generatedSrcPath)
 
-        val xmlData = StringsXmlParser(project.name).getXmlData()
+        val xmlData = AndroidStringsParser(project.name).getXmlData()
         L10nGenerator(xmlData, generatedSrcPath, project.name).generateCode()
 
         addSourceSet(project)
