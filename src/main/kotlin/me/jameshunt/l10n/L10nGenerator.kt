@@ -35,10 +35,10 @@ class L10nGenerator(
 
     private fun List<LanguageSet>.generateLanguageImplementations() {
 
-        this.forEach {
-            val fileName = when (it.language) {
+        this.forEach { languageSet ->
+            val fileName = when (languageSet.language) {
                 "default" -> "Default"
-                else -> it.language.toUpperCase()
+                else -> languageSet.language.toUpperCase()
             }
 
             val path = "$generatedSrcPath/$fileName.kt"
@@ -47,12 +47,12 @@ class L10nGenerator(
                 out.writeLn("package $packageName")
                 out.newLine()
 
-                when(it.language == "default") {
+                when(languageSet.language == "default") {
                     true ->  out.writeLn("class $fileName: Language {")
                     false ->  out.writeLn("class $fileName: Language by Default() {")
                 }
 
-                it.variables.forEach {
+                languageSet.variables.forEach {
                     out.writeLn("    override val ${it.key} = \"${it.value}\"")
                 }
 
@@ -82,11 +82,11 @@ class L10nGenerator(
 
             default.variables.keys.forEach {
                 out.writeLn("    val $it: String")
-                out.writeLn("        get() = androidStrings.$it")
+                out.writeLn("        get() = selectedLanguage.$it")
                 out.newLine()
             }
 
-            out.writeLn("    private val androidStrings: Language by lazy {")
+            out.writeLn("    private val selectedLanguage: Language by lazy {")
             out.writeLn("        when (Locale.getDefault().language) {")
 
             otherLanguages.forEach {
