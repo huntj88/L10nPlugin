@@ -1,9 +1,11 @@
 buildscript {
     ext.kotlin_version = '1.2.60'
     repositories {
+        google()
         jcenter()
     }
     dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -14,12 +16,14 @@ group 'me.jameshunt'
 version '1.0-SNAPSHOT'
 
 repositories {
+    google()
     mavenCentral()
 }
 
 dependencies {
     compileOnly gradleApi()
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compileOnly "com.android.tools.build:gradle:3.1.4"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 compileKotlin {
