@@ -5,9 +5,10 @@ import java.io.File
 
 class L10nGenerator(
         private val xmlData: List<LanguageSet>,
-        private val generatedSrcPath: String
+        private val generatedSrcPath: String,
+        projectName: String
 ) {
-    private val packageName: String = "me.jameshunt"
+    private val packageName: String = "me.jameshunt.$projectName"
 
     fun generateCode() {
         xmlData.first().variables.keys.toList().generateLanguageInterface()

@@ -16,7 +16,7 @@ class L10nPlugin : Plugin<Project> {
         //todo: check hash of strings.xml to see if it changed, and if not do nothing
         val xmlData = StringsXmlParser(project.name).getXmlData()
 
-        L10nGenerator(xmlData, generatedSrcPath).generateCode()
+        L10nGenerator(xmlData, generatedSrcPath, project.name).generateCode()
 
         val sourceSets = (project.extensions.getByName("android") as BaseExtension).sourceSets.asMap
         sourceSets.forEach { sourceSetName, sourceSet ->
