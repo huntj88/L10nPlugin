@@ -10,8 +10,9 @@ class L10nGenerator(
 ) {
     private val packageName: String = "me.jameshunt.$projectName"
 
+    private val placeholderPattern = Regex("%[0-9]\\$[sd]")
+
     fun generateCode() {
-        //xmlData.first().variables.keys.toList().generateLanguageInterface()
         xmlData.first().generateLanguageInterface()
 
         xmlData.generateLanguageImplementations()
@@ -26,20 +27,17 @@ class L10nGenerator(
 
             out.writeLn("interface Language {")
 
-            val pattern = Regex("%[0-9]\\$[sd]")
+
 
             this.variables.forEach { key, value ->
-                val placeHolders = pattern.findAll(value).map { it.value }.toList()
-
-                println("size: ${placeHolders.size}")
+                val placeHolders = placeholderPattern.findAll(value).map { it.value }.toList()
 
                 when (placeHolders.isEmpty()) {
                     true -> out.writeLn("    val $key: String")
                     false -> {
-
-                        val parameters = placeHolders.foldIndexed("(") { index, acc, next ->
-                            "${acc}param$index: String, "
-                        }.substringBeforeLast(",") + ")"
+                        val parameters = placeHolders
+                                .foldIndexed("(") { index, acc, _ -> "${acc}param$index: String, " }
+                                .substringBeforeLast(",") + ")"
 
                         out.writeLn("    fun $key$parameters: String")
                     }
@@ -69,8 +67,26 @@ class L10nGenerator(
                     false -> out.writeLn("class $fileName: Language by Default() {")
                 }
 
-                languageSet.variables.forEach {
-                    out.writeLn("    override val ${it.key} = \"${it.value}\"")
+                languageSet.variables.forEach { key, value ->
+
+                    val placeHolders = placeholderPattern.findAll(value).map { it.value }.toList()
+
+                    when (placeHolders.isEmpty()) {
+                        true -> out.writeLn("    override val $key = \"$value\"")
+                        false -> {
+                            val parameters = placeHolders
+                                    .foldIndexed("(") { index, acc, _ -> "${acc}param$index: String, " }
+                                    .substringBeforeLast(",") + ")"
+
+
+                            val afterEquals = placeHolders.foldIndexed("\"$value\"") { index, acc, string ->
+                                acc.replace(string, "\$param$index")
+                            }
+
+
+                            out.writeLn("    override fun $key$parameters: String = $afterEquals")
+                        }
+                    }
                 }
 
                 out.writeLn("}")
