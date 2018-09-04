@@ -113,10 +113,29 @@ class L10nGenerator(
 
             out.writeLn("object L10n {")
 
-            default.variables.keys.forEach {
-                out.writeLn("    val $it: String")
-                out.writeLn("        get() = selectedLanguage.$it")
-                out.newLine()
+            default.variables.forEach { key, value ->
+
+                val placeHolders = placeholderPattern.findAll(value).map { it.value }.toList()
+
+                when (placeHolders.isEmpty()) {
+                    true -> {
+                        out.writeLn("    val $key: String")
+                        out.writeLn("        get() = selectedLanguage.$key")
+                        out.newLine()
+                    }
+                    false -> {
+                        val parameters = placeHolders
+                                .foldIndexed("(") { index, acc, _ -> "${acc}param$index: String, " }
+                                .substringBeforeLast(",") + ")"
+
+                        val parametersEnd = placeHolders
+                                .foldIndexed("(") { index, acc, _ -> "${acc}param$index, " }
+                                .substringBeforeLast(",") + ")"
+
+                        out.writeLn("    fun $key$parameters: String = selectedLanguage.$key$parametersEnd")
+                        out.newLine()
+                    }
+                }
             }
 
             out.writeLn("    private val selectedLanguage: Language by lazy {")
