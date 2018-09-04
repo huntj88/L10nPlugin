@@ -11,22 +11,39 @@ class L10nGenerator(
     private val packageName: String = "me.jameshunt.$projectName"
 
     fun generateCode() {
-        xmlData.first().variables.keys.toList().generateLanguageInterface()
+        //xmlData.first().variables.keys.toList().generateLanguageInterface()
+        xmlData.first().generateLanguageInterface()
 
         xmlData.generateLanguageImplementations()
 
         xmlData.generateL10n()
     }
 
-    private fun List<String>.generateLanguageInterface() {
+    private fun LanguageSet.generateLanguageInterface() {
         File("$generatedSrcPath/Language.kt").bufferedWriter().use { out ->
             out.writeLn("package $packageName")
             out.newLine()
 
             out.writeLn("interface Language {")
 
-            this.forEach {
-                out.writeLn("    val $it: String")
+            val pattern = Regex("%[0-9]\\$[sd]")
+
+            this.variables.forEach { key, value ->
+                val placeHolders = pattern.findAll(value).map { it.value }.toList()
+
+                println("size: ${placeHolders.size}")
+
+                when (placeHolders.isEmpty()) {
+                    true -> out.writeLn("    val $key: String")
+                    false -> {
+
+                        val parameters = placeHolders.foldIndexed("(") { index, acc, next ->
+                            "${acc}param$index: String, "
+                        }.substringBeforeLast(",") + ")"
+
+                        out.writeLn("    fun $key$parameters: String")
+                    }
+                }
             }
 
             out.writeLn("}")
@@ -47,9 +64,9 @@ class L10nGenerator(
                 out.writeLn("package $packageName")
                 out.newLine()
 
-                when(languageSet.language == "default") {
-                    true ->  out.writeLn("class $fileName: Language {")
-                    false ->  out.writeLn("class $fileName: Language by Default() {")
+                when (languageSet.language == "default") {
+                    true -> out.writeLn("class $fileName: Language {")
+                    false -> out.writeLn("class $fileName: Language by Default() {")
                 }
 
                 languageSet.variables.forEach {
