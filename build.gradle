@@ -24,11 +24,6 @@ dependencies {
     compileOnly gradleApi()
     compileOnly "com.android.tools.build:gradle:3.1.4"
 
-    compile ("org.simpleframework:simple-xml:2.7.1") {
-        exclude group: 'stax', module: 'stax-api'
-        exclude group: 'xpp3', module: 'xpp3'
-    }
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     testImplementation "junit:junit:4.12"
 }

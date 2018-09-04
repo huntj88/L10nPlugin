@@ -1,8 +1,11 @@
 package me.jameshunt.l10n
 
-import org.simpleframework.xml.*
-import org.simpleframework.xml.core.Persister
+import org.xml.sax.Attributes
+import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
+import org.xml.sax.helpers.DefaultHandler
 import java.io.File
+import javax.xml.parsers.SAXParserFactory
 
 
 class AndroidStringsParser(private val projectName: String) {
@@ -32,43 +35,90 @@ class AndroidStringsParser(private val projectName: String) {
     }
 
     private fun parseXml(stringFile: StringFile): LanguageSet {
-        val serializer = Persister()
-        val xmlResult = serializer.read(Resources::class.java, stringFile.file)
-        val map = xmlResult.list.map { Pair(it.name, it.value.escapeCharacters()) }.toMap()
+        val parser = SAXParserFactory.newInstance().newSAXParser()
+        val xmlHandler = AndroidStringsHandler()
 
-        return LanguageSet(stringFile.language, map)
-    }
+        parser.parse(stringFile.file, xmlHandler)
 
-    private fun String.escapeCharacters(): String {
-        return this.escapeBackslash().escapeDoubleQuotes()
-    }
-
-    private fun String.escapeBackslash(): String {
-        return this.replace("\\","\\\\")
-    }
-
-    private fun String.escapeDoubleQuotes(): String {
-        return this.replace("\"","\\\"")
+        return LanguageSet(stringFile.language, xmlHandler.androidStrings)
     }
 }
 
 
-@Root
-private data class Resources @JvmOverloads constructor(
+private class AndroidStringsHandler : DefaultHandler() {
 
-        @field:ElementList(inline=true)
-        var list: MutableList<AndroidString> = mutableListOf()
-)
+    val androidStrings = mutableMapOf<String, String>()
 
-@Root(name = "string")
-private data class AndroidString @JvmOverloads constructor(
+    var key = ""
 
-        @field:Attribute
-        var name: String = "",
+    var accumulator = StringBuffer()
 
-        @field:Text
-        var value: String = ""
-)
+    var stackDepth = 0
+
+    override fun startElement(uri: String, localName: String, qName: String, attributes: Attributes) {
+        when (qName.toLowerCase()) {
+            "resources" -> {}
+            "string" -> {
+                stackDepth = 0
+                accumulator.setLength(0)
+                this.key = attributes.getValue(0)
+            }
+            else -> {
+                stackDepth++
+            }
+        }
+    }
+
+    override fun characters(ch: CharArray, start: Int, length: Int) {
+        accumulator.append(ch, start, length)
+    }
+
+    override fun endElement(uri: String, localName: String, qName: String) {
+        when (qName) {
+            "resources" -> {}
+            "string" -> {
+                if (stackDepth == 0) {
+                    androidStrings[this.key] = accumulator.toString().trim().escapeCharacters()
+                } else {
+                    println("string contains features not supported: $key")
+                }
+            }
+            else -> {
+                println("strings.xml feature not supported: $qName")
+            }
+        }
+    }
+
+    override fun warning(exception: SAXParseException) {
+        println("WARNING: line ${exception.lineNumber}: ${exception.message}")
+    }
+
+    /** This method is called when errors occur  */
+    override fun error(exception: SAXParseException) {
+        println("ERROR: line ${exception.lineNumber}: ${exception.message}")
+    }
+
+    /** This method is called when non-recoverable errors occur.  */
+    @Throws(SAXException::class)
+    override fun fatalError(exception: SAXParseException) {
+        println("FATAL: line ${exception.lineNumber}: ${exception.message}")
+        throw exception
+    }
+
+
+    private fun String.escapeCharacters(): String {
+        return this.escapeDoubleQuotes().escapeNewLine()
+    }
+
+
+    private fun String.escapeDoubleQuotes(): String {
+        return this.replace("\"", "\\\"")
+    }
+
+    private fun String.escapeNewLine(): String {
+        return this.replace(Regex("(\r\n|\r|\n)[ ]+"), "\\\\n").replace("\n", " ")
+    }
+}
 
 private data class StringFile(
         val language: String,
