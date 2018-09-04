@@ -24,7 +24,6 @@ class AndroidStringsParser(private val projectName: String) {
                 .filter { it.name.contains("values") }
                 .filter { File("${it.canonicalPath}/strings.xml").exists() }
                 .map {
-
                     val language = it.name.substringAfter("-", "default")
 
                     StringFile(
@@ -47,13 +46,17 @@ class AndroidStringsParser(private val projectName: String) {
 
 private class AndroidStringsHandler : DefaultHandler() {
 
+    /**
+     * this class could use some work
+     * needs better warnings for unsupported stuff
+     */
+
     val androidStrings = mutableMapOf<String, String>()
 
     var key = ""
-
     var accumulator = StringBuffer()
 
-    var stackDepth = 0
+    var stackDepth = 0 //todo: really weird name, and weird way to solve something. come up with better way
 
     override fun startElement(uri: String, localName: String, qName: String, attributes: Attributes) {
         when (qName.toLowerCase()) {
@@ -89,6 +92,18 @@ private class AndroidStringsHandler : DefaultHandler() {
         }
     }
 
+    private fun String.escapeCharacters(): String {
+        return this.escapeDoubleQuotes().escapeNewLine()
+    }
+
+    private fun String.escapeDoubleQuotes(): String {
+        return this.replace("\"", "\\\"")
+    }
+
+    private fun String.escapeNewLine(): String {
+        return this.replace(Regex("(\r\n|\r|\n)[ ]+"), "\\\\n").replace("\n", " ")
+    }
+
     override fun warning(exception: SAXParseException) {
         println("WARNING: line ${exception.lineNumber}: ${exception.message}")
     }
@@ -103,20 +118,6 @@ private class AndroidStringsHandler : DefaultHandler() {
     override fun fatalError(exception: SAXParseException) {
         println("FATAL: line ${exception.lineNumber}: ${exception.message}")
         throw exception
-    }
-
-
-    private fun String.escapeCharacters(): String {
-        return this.escapeDoubleQuotes().escapeNewLine()
-    }
-
-
-    private fun String.escapeDoubleQuotes(): String {
-        return this.replace("\"", "\\\"")
-    }
-
-    private fun String.escapeNewLine(): String {
-        return this.replace(Regex("(\r\n|\r|\n)[ ]+"), "\\\\n").replace("\n", " ")
     }
 }
 

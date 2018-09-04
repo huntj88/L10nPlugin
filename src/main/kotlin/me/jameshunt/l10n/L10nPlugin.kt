@@ -1,6 +1,9 @@
 package me.jameshunt.l10n
 
 import com.android.build.gradle.BaseExtension
+import me.jameshunt.l10n.generate.L10nImplementation
+import me.jameshunt.l10n.generate.LanguageImplementation
+import me.jameshunt.l10n.generate.LanguageInterface
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
@@ -20,12 +23,11 @@ class L10nPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         println("apply L10n")
-
         val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+
         setupGeneratedSourceDirectory(generatedSrcPath)
 
-        val xmlData = AndroidStringsParser(project.name).getXmlData()
-        L10nGenerator(xmlData, generatedSrcPath, project.name).generateCode()
+        generateCode(project.name, generatedSrcPath)
 
         addSourceSet(project)
     }
@@ -35,6 +37,15 @@ class L10nPlugin : Plugin<Project> {
 
         if (generatedSourceFolder.exists()) return
         generatedSourceFolder.mkdirs()
+    }
+
+    private fun generateCode(projectName: String, generatedSrcPath: String) {
+        val packageName = "me.jameshunt.$projectName"
+        val xmlData = AndroidStringsParser(projectName).getXmlData()
+
+        LanguageInterface(generatedSrcPath, packageName).generate(xmlData)
+        LanguageImplementation(generatedSrcPath, packageName).generate(xmlData)
+        L10nImplementation(generatedSrcPath, packageName).generate(xmlData)
     }
 
     private fun addSourceSet(project: Project) {
