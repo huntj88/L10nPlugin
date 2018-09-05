@@ -56,18 +56,18 @@ private class AndroidStringsHandler : DefaultHandler() {
     var key = ""
     var accumulator = StringBuffer()
 
-    var stackDepth = 0 //todo: really weird name, and weird way to solve something. come up with better way
+    var ableToParse = false
 
     override fun startElement(uri: String, localName: String, qName: String, attributes: Attributes) {
         when (qName.toLowerCase()) {
             "resources" -> {}
             "string" -> {
-                stackDepth = 0
+                ableToParse = true
                 accumulator.setLength(0)
                 this.key = attributes.getValue(0)
             }
             else -> {
-                stackDepth++
+                ableToParse = false
             }
         }
     }
@@ -80,14 +80,14 @@ private class AndroidStringsHandler : DefaultHandler() {
         when (qName) {
             "resources" -> {}
             "string" -> {
-                if (stackDepth == 0) {
+                if (ableToParse) {
                     androidStrings[this.key] = accumulator.toString().trim().escapeCharacters()
                 } else {
                     println("string contains features not supported: $key")
                 }
             }
             else -> {
-                println("strings.xml feature not supported: $qName")
+                println("strings.xml feature not supported: <$qName>")
             }
         }
     }
@@ -108,12 +108,10 @@ private class AndroidStringsHandler : DefaultHandler() {
         println("WARNING: line ${exception.lineNumber}: ${exception.message}")
     }
 
-    /** This method is called when errors occur  */
     override fun error(exception: SAXParseException) {
         println("ERROR: line ${exception.lineNumber}: ${exception.message}")
     }
 
-    /** This method is called when non-recoverable errors occur.  */
     @Throws(SAXException::class)
     override fun fatalError(exception: SAXParseException) {
         println("FATAL: line ${exception.lineNumber}: ${exception.message}")

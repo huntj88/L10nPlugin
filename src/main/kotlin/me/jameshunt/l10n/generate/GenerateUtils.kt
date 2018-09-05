@@ -2,7 +2,7 @@ package me.jameshunt.l10n.generate
 
 import java.io.BufferedWriter
 
-val placeholderPattern = Regex("%[0-9]\\$[sd]")
+val placeholderPattern = Regex("%[0-9]\\$[sd]|%[sd]")
 
 internal fun BufferedWriter.writeLn(line: String) {
     this.write(line)

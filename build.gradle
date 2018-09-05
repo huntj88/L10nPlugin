@@ -13,7 +13,7 @@ buildscript {
 apply plugin: 'kotlin'
 
 group 'me.jameshunt'
-version '1.0-SNAPSHOT'
+version '0.9.0'
 
 repositories {
     google()

@@ -10,17 +10,6 @@ import java.io.File
 
 class L10nPlugin : Plugin<Project> {
 
-    /** TODO
-     *  hash of each string file. feed the ones that changed to the generator
-     *
-     *  lol, what if i made a generated git repo (local only) inside the build/generated/source/L10n/src folder?
-     *
-     *  then i could use it to track changes to the strings.xml files(using symlink or something), and only generate a little bit of code.
-     *  could maybe get incremental changes to the language file
-     *
-     *  if there were version conflicts just force push
-     */
-
     override fun apply(project: Project) {
         println("apply L10n")
         val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
