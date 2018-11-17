@@ -4,10 +4,8 @@ import com.android.build.gradle.BaseExtension
 import me.jameshunt.l10n.generate.L10nImplementation
 import me.jameshunt.l10n.generate.LanguageImplementation
 import me.jameshunt.l10n.generate.LanguageInterface
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import java.io.File
 
 class L10nPlugin : Plugin<Project> {
@@ -35,25 +33,47 @@ class L10nPlugin : Plugin<Project> {
 
         project.afterEvaluate {
 
+            project
+                    .gradle
+                    .taskGraph
+                    .allTasks
+                    .also { it.forEach { task -> println(task.name) } }
+                    .firstOrNull { task -> task.name.contains("clean") }
+                    ?.let { firstTask ->
+                        firstTask.doFirst {
+                            println("apply L10n")
+
+                            val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+
+                            setupGeneratedSourceDirectory(generatedSrcPath)
+
+                            generateCode(project.name, generatedSrcPath)
+
+                            addSourceSet(project)
+                        }
+                    }
+
+//            project.tasks.firstOrNull()?.let { firstTask ->
+//                firstTask.doFirst {
+//                    println("apply L10n")
+//
+//                    val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+//
+//                    setupGeneratedSourceDirectory(generatedSrcPath)
+//
+//                    generateCode(project.name, generatedSrcPath)
+//
+//                    addSourceSet(project)
+//                }
+//            }
+
 //            project.tasks.getByName("preBuild").finalizedBy(
 //                project.tasks.getByName(generateTask)
 //            )
 
-            project.tasks.getByName("preBuild").doFirst {
-                println("apply L10n")
-
-                val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
-
-                setupGeneratedSourceDirectory(generatedSrcPath)
-
-                generateCode(project.name, generatedSrcPath)
-
-                addSourceSet(project)
-            }
-
-            project.tasks.forEach { task ->
-                println(task.name)
-            }
+//            project.tasks.forEach { task ->
+//                println(task.name)
+//            }
         }
     }
 
