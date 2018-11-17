@@ -38,7 +38,7 @@ class L10nPlugin : Plugin<Project> {
                 .whenReady { graph ->
                     graph.allTasks
                             .also { it.forEach { task -> println(task.name) } }
-                            .firstOrNull { task -> task.name.contains("clean") }
+                            .firstOrNull { task -> !task.name.contains("clean") }
                             ?.let { firstTask ->
                                 firstTask.doFirst {
                                     println("apply L10n")
