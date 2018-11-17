@@ -4,8 +4,10 @@ import com.android.build.gradle.BaseExtension
 import me.jameshunt.l10n.generate.L10nImplementation
 import me.jameshunt.l10n.generate.LanguageImplementation
 import me.jameshunt.l10n.generate.LanguageInterface
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import java.io.File
 
 class L10nPlugin : Plugin<Project> {
@@ -15,15 +17,20 @@ class L10nPlugin : Plugin<Project> {
         val generateTask = "generateL10n"
 
         project.tasks.create(generateTask) {
-            println("apply L10n")
 
-            val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+            val action = Action<Task> {
+                println("apply L10n")
 
-            setupGeneratedSourceDirectory(generatedSrcPath)
+                val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
 
-            generateCode(project.name, generatedSrcPath)
+                setupGeneratedSourceDirectory(generatedSrcPath)
 
-            addSourceSet(project)
+                generateCode(project.name, generatedSrcPath)
+
+                addSourceSet(project)
+            }
+
+            it.actions.add(action)
         }
 
         project.afterEvaluate {
