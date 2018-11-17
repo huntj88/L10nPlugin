@@ -14,11 +14,32 @@ class L10nPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
 
-        val generateTask = "generateL10n"
+        //val generateTask = "generateL10n"
 
-        project.tasks.create(generateTask) {
+//        project.tasks.create(generateTask) {
+//
+//            val action = Action<Task> {
+//                println("apply L10n")
+//
+//                val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+//
+//                setupGeneratedSourceDirectory(generatedSrcPath)
+//
+//                generateCode(project.name, generatedSrcPath)
+//
+//                addSourceSet(project)
+//            }
+//
+//            it.actions.add(action)
+//        }
 
-            val action = Action<Task> {
+        project.afterEvaluate {
+
+//            project.tasks.getByName("preBuild").finalizedBy(
+//                project.tasks.getByName(generateTask)
+//            )
+
+            project.tasks.getByName("preBuild").doFirst {
                 println("apply L10n")
 
                 val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
@@ -29,15 +50,6 @@ class L10nPlugin : Plugin<Project> {
 
                 addSourceSet(project)
             }
-
-            it.actions.add(action)
-        }
-
-        project.afterEvaluate {
-
-            project.tasks.getByName("preBuild").finalizedBy(
-                project.tasks.getByName(generateTask)
-            )
 
             project.tasks.forEach { task ->
                 println(task.name)
