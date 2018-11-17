@@ -31,27 +31,32 @@ class L10nPlugin : Plugin<Project> {
 //            it.actions.add(action)
 //        }
 
-        project.afterEvaluate {
 
-            project
-                    .gradle
-                    .taskGraph
-                    .allTasks
-                    .also { it.forEach { task -> println(task.name) } }
-                    .firstOrNull { task -> task.name.contains("clean") }
-                    ?.let { firstTask ->
-                        firstTask.doFirst {
-                            println("apply L10n")
+        project
+                .gradle
+                .taskGraph
+                .whenReady { graph ->
+                    graph.allTasks
+                            .also { it.forEach { task -> println(task.name) } }
+                            .firstOrNull { task -> task.name.contains("clean") }
+                            ?.let { firstTask ->
+                                firstTask.doFirst {
+                                    println("apply L10n")
 
-                            val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+                                    val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
 
-                            setupGeneratedSourceDirectory(generatedSrcPath)
+                                    setupGeneratedSourceDirectory(generatedSrcPath)
 
-                            generateCode(project.name, generatedSrcPath)
+                                    generateCode(project.name, generatedSrcPath)
 
-                            addSourceSet(project)
-                        }
-                    }
+                                    addSourceSet(project)
+                                }
+                            }
+                }
+
+
+//        project.afterEvaluate {
+
 
 //            project.tasks.firstOrNull()?.let { firstTask ->
 //                firstTask.doFirst {
@@ -74,7 +79,7 @@ class L10nPlugin : Plugin<Project> {
 //            project.tasks.forEach { task ->
 //                println(task.name)
 //            }
-        }
+//        }
     }
 
     private fun setupGeneratedSourceDirectory(generatedSrcPath: String) {
