@@ -11,6 +11,14 @@ With L10n the entire abstraction is generated on the fly, and you are free to us
 
 
 
+## FAQ's
+[What is the L10n standard?](https://blog.mozilla.org/l10n/2011/12/14/i18n-vs-l10n-whats-the-diff/)
+
+[Where did the inspiration come from?](https://github.com/SwiftGen/SwiftGen#strings)
+
+
+
+
 ## Installation Instructions
 
 Add this to your top level build.gradle file in the buildscript section under repositories.
@@ -47,13 +55,6 @@ L10n does not currently support:
 - HTML elements inside the strings
 
 all of these can still be used the conventional way
-
-
-
-## FAQ's
-[What is the L10n standard?](https://blog.mozilla.org/l10n/2011/12/14/i18n-vs-l10n-whats-the-diff/)
-
-[Where did the inspiration come from?](https://github.com/SwiftGen/SwiftGen#strings)
 
 
 

@@ -11,14 +11,17 @@ import java.io.File
 class L10nPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        println("apply L10n")
-        val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
+        project.afterEvaluate {
+            println("apply L10n")
 
-        setupGeneratedSourceDirectory(generatedSrcPath)
+            val generatedSrcPath = "./${project.name}/build/generated/source/L10n/src"
 
-        generateCode(project.name, generatedSrcPath)
+            setupGeneratedSourceDirectory(generatedSrcPath)
 
-        addSourceSet(project)
+            generateCode(project.name, generatedSrcPath)
+
+            addSourceSet(project)
+        }
     }
 
     private fun setupGeneratedSourceDirectory(generatedSrcPath: String) {
